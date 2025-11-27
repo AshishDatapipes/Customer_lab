@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: fct_attribution_first
+    description: "First‑click attribution fact table"
+    columns:
+      - name: user_pseudo_id
+        tests:
+          - not_null
+      - name: session_date
+        tests:
+          - not_null
+      - name: first_click_source
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["google", "facebook", "direct", "email", "other"]
+      - name: first_click_medium
+        tests:
+          - not_null
+      - name: first_click_campaign
+        tests:
+          - not_null
+
+  - name: fct_attribution_last
+    description: "Last‑click attribution fact table"
+    columns:
+      - name: user_pseudo_id
+        tests:
+          - not_null
+      - name: session_date
+        tests:
+          - not_null
+      - name: last_click_source
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["google", "facebook", "direct", "email", "other"]
+      - name: last_click_medium
+        tests:
+          - not_null
+      - name: last_click_campaign
+        tests:
+          - not_null
