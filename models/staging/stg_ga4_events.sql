@@ -1,42 +1,44 @@
 {{
     config(
         materialized="incremental",
-        unique_key="event_id",
+        unique_key="user_pseudo_id",
         incremental_strategy="merge",
-        on_schema_change="append_new_columns",
     )
 }}
 
-with
-    base as (
-        select
-            cast(event_timestamp as timestamp) as event_ts,
-            event_date,
-            event_name,
-            user_pseudo_id,
-            event_id,
-            traffic_source.source as source,
-            traffic_source.medium as medium,
-            traffic_source.campaign as campaign,
-            (
-                select value.string_value
-                from unnest(event_params)
-                where key = 'page_location'
-            ) as page_location,
-            (
-                select value.string_value
-                from unnest(event_params)
-                where key = 'session_id'
-            ) as session_id
-        from {{ source("ga4", "events") }}
-        {% if is_incremental() %}
-            where
-                cast(event_timestamp as timestamp) > (
-                    select coalesce(max(event_ts), timestamp('1970-01-01'))
-                    from {{ this }}
-                )
-        {% endif %}
-    )
-select *
-from base
-;
+select
+    event_date,
+    timestamp_micros(event_timestamp) as event_ts,
+    user_pseudo_id,
+    event_name,
+    event_bundle_sequence_id,
+    event_previous_timestamp,
+
+    -- traffic source
+    traffic_source.source as ts_source,
+    traffic_source.medium as ts_medium,
+    traffic_source.name as ts_campaign,
+
+    -- page context
+    (
+        select ep.value.string_value
+        from unnest(event_params) ep
+        where ep.key = 'page_location'
+        limit 1
+    ) as page_location,
+    (
+        select ep.value.string_value
+        from unnest(event_params) ep
+        where ep.key = 'page_referrer'
+        limit 1
+    ) as page_referrer,
+
+    -- device & geo
+    device.category as device_category,
+    geo.country as geo_country,
+    geo.city as geo_city,
+
+    -- ecommerce
+    ecommerce.transaction_id as transaction_id
+
+from `bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*`
