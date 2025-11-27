@@ -44,4 +44,4 @@ customer_lab/
 ## Next Steps
 - Enhance attribution logic with multi-touch rules.  
 - Build Looker Studio dashboard for visualization.  
-- Add automated job scheduling in dbt Cloud.
+- Add streaming ingestion (Pub/Sub → BigQuery → dbt incremental).
