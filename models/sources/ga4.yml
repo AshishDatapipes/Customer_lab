@@ -1,7 +1,6 @@
 sources:
-  - name: ga4
+  - name: customer_lab
     database: customerlab-479311
     schema: customer_lab
     tables:
-      - name: events
-        identifier: events_*
+      - name: ga4_streaming_events
